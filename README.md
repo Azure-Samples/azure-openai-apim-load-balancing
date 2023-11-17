@@ -14,12 +14,9 @@ products:
 - azure-key-vault
 name: Azure OpenAI Service Load Balancing with Azure API Management
 description: This sample demonstrates how to load balance requests between multiple Azure OpenAI Services using Azure API Management.
-azureDeploy: https://raw.githubusercontent.com/Azure-Samples/azure-openai-apim-load-balancing/main/infra/main.json
 ---
 
 # Azure OpenAI Service Load Balancing with Azure API Management
-
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fazure-openai-apim-load-balancing%2Fmain%2Finfra%2Fmain.json)
 
 This sample demonstrates how to use [Azure API Management](https://learn.microsoft.com/en-us/azure/api-management/api-management-key-concepts) to load balance requests to multiple instances of the [Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview).
 
