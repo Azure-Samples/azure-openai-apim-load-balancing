@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "ms-dotnettools.dotnet-interactive-vscode",
+        "ms-vscode.azurecli",
+        "ms-azuretools.vscode-bicep",
+        "ms-dotnettools.csdevkit"
+    ]
+}

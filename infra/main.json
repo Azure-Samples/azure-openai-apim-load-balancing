@@ -1,0 +1,1697 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "languageVersion": "2.0",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.23.1.45101",
+      "templateHash": "2146692389026347169"
+    }
+  },
+  "definitions": {
+    "openAIInstanceInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "nullable": true
+        },
+        "location": {
+          "type": "string"
+        },
+        "suffix": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "parameters": {
+    "workloadName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "metadata": {
+        "description": "Name of the workload which is used to generate a short unique hash used in all resources."
+      }
+    },
+    "location": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Primary location for all resources."
+      }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the resource group. If empty, a unique name will be generated."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Tags for all resources."
+      }
+    },
+    "managedIdentityName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the Managed Identity. If empty, a unique name will be generated."
+      }
+    },
+    "keyVaultName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the Key Vault. If empty, a unique name will be generated."
+      }
+    },
+    "openAIInstances": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/openAIInstanceInfo"
+      },
+      "defaultValue": [
+        {
+          "name": "",
+          "location": "westeurope",
+          "suffix": "weu"
+        },
+        {
+          "name": "",
+          "location": "eastus",
+          "suffix": "eus"
+        }
+      ],
+      "metadata": {
+        "description": "OpenAI instances to deploy. Defaults to 2 across different regions."
+      }
+    },
+    "apiManagementName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the API Management service. If empty, a unique name will be generated."
+      }
+    },
+    "apiManagementPublisherEmail": {
+      "type": "string",
+      "metadata": {
+        "description": "Email address for the API Management service publisher."
+      }
+    },
+    "apiManagementPublisherName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the API Management service publisher."
+      }
+    }
+  },
+  "variables": {
+    "$fxv#0": {
+      "cognitiveSearch": "srch-",
+      "cognitiveServices": "cog-",
+      "machineLearningWorkspace": "mlw-",
+      "analysisServicesServer": "as",
+      "databricksWorkspace": "dbw-",
+      "dataExplorerCluster": "dec",
+      "dataExplorerClusterDatabase": "dedb",
+      "dataFactory": "adf-",
+      "digitalTwin": "dt-",
+      "streamAnalytics": "asa-",
+      "synapseAnalyticsWorkspaces": "synw",
+      "synapseAnalyticsSQLDedicatedPool": "syndp",
+      "synapseAnalyticsSparkPool": "synsp",
+      "dataLakeStoreAccount": "dls",
+      "eventHubsNamespace": "evhns-",
+      "eventHub": "evh-",
+      "eventGridDomain": "evgd-",
+      "eventGridSubscriptions": "evgs-",
+      "eventGridTopic": "evgt-",
+      "eventGridSystemTopic": "egst-",
+      "hdInsightHadoopCluster": "hadoop-",
+      "hdInsightHBaseCluster": "hbase-",
+      "hdInsightKafkaCluster": "kafka-",
+      "hdInsightSparkCluster": "spark-",
+      "hdInsightStormCluster": "storm-",
+      "hdInsightMLServicesCluster": "mls-",
+      "iotHub": "iot-",
+      "provisioningServices": "provs-",
+      "provisioningServicesCertificate": "pcert-",
+      "powerBIEmbedded": "pbi-",
+      "timeSeriesInsightsEnvironment": "tsi-",
+      "appServiceEnvironment": "ase-",
+      "appServicePlan": "asp-",
+      "loadTesting": "lt-",
+      "availabilitySet": "avail-",
+      "arcEnabledServer": "arcs-",
+      "arcEnabledKubernetesCluster": "arck",
+      "batchAccounts": "ba-",
+      "cloudService": "cld-",
+      "communicationServices": "acs-",
+      "diskEncryptionSet": "des",
+      "functionApp": "func-",
+      "gallery": "gal",
+      "hostingEnvironment": "host-",
+      "imageTemplate": "it-",
+      "managedDiskOS": "osdisk",
+      "managedDiskData": "disk",
+      "notificationHubs": "ntf-",
+      "notificationHubsNamespace": "ntfns-",
+      "proximityPlacementGroup": "ppg-",
+      "snapshot": "snap-",
+      "staticWebApp": "stapp-",
+      "virtualMachine": "vm",
+      "virtualMachineScaleSet": "vmss-",
+      "virtualMachineMaintenanceConfiguration": "mc-",
+      "virtualMachineStorageAccount": "stvm",
+      "webApp": "app-",
+      "aksCluster": "aks-",
+      "containerApp": "ca-",
+      "containerAppsEnvironment": "cae-",
+      "containerRegistry": "cr",
+      "containerInstance": "ci",
+      "serviceFabricCluster": "sf-",
+      "serviceFabricManagedCluster": "sfmc-",
+      "cosmosDBDatabase": "cosmos-",
+      "cosmosDBApacheCassandra": "coscas-",
+      "cosmosDBMongoDB": "cosmon-",
+      "cosmosDBNoSQL": "cosno-",
+      "cosmosDBTable": "costab-",
+      "cosmosDBGremlin": "cosgrm-",
+      "cosmosDBPostgreSQL": "cospos-",
+      "cacheForRedis": "redis-",
+      "sqlDatabaseServer": "sql-",
+      "sqlDatabase": "sqldb-",
+      "sqlElasticJobAgent": "sqlja-",
+      "sqlElasticPool": "sqlep-",
+      "mariaDBServer": "maria-",
+      "mariaDBDatabase": "mariadb-",
+      "mySQLDatabase": "mysql-",
+      "postgreSQLDatabase": "psql-",
+      "sqlServerStretchDatabase": "sqlstrdb-",
+      "sqlManagedInstance": "sqlmi-",
+      "appConfigurationStore": "appcs-",
+      "mapsAccount": "map-",
+      "signalR": "sigr",
+      "webPubSub": "wps-",
+      "managedGrafana": "amg-",
+      "apiManagementService": "apim-",
+      "integrationAccount": "ia-",
+      "logicApps": "logic-",
+      "serviceBusNamespace": "sbns-",
+      "serviceBusQueue": "sbq-",
+      "serviceBusTopic": "sbt-",
+      "serviceBusTopicSubscription": "sbts-",
+      "automationAccount": "aa-",
+      "applicationInsights": "appi-",
+      "monitorActionGroup": "ag-",
+      "monitorDataCollectionRules": "dcr-",
+      "blueprint": "bp-",
+      "blueprintAssignment": "bpa-",
+      "logAnalyticsWorkspace": "log-",
+      "logAnalyticsQueryPacks": "pack-",
+      "managementGroup": "mg-",
+      "purviewInstance": "pview-",
+      "resourceGroup": "rg-",
+      "templateSpecsName": "ts-",
+      "migrateProject": "migr-",
+      "databaseMigrationService": "dms-",
+      "recoveryServicesVault": "rsv-",
+      "applicationGateway": "agw-",
+      "applicationSecurityGroup": "asg-",
+      "cdnProfile": "cdnp-",
+      "cdnEndpoint": "cdne-",
+      "connections": "con-",
+      "dnsPrivateResolver": "dnspr-",
+      "dnsPrivateResolverInboundEndpoint": "in-",
+      "dnsPrivateResolverOutboundEndpoint": "out-",
+      "firewall": "afw-",
+      "firewallPolicy": "afwp-",
+      "expressRouteCircuit": "erc-",
+      "frontDoorProfile": "afd-",
+      "frontDoorEndpoint": "fde-",
+      "frontDoorFirewallPolicy": "fdfp-",
+      "loadBalancerInternal": "lbi-",
+      "loadBalancerExternal": "lbe-",
+      "loadBalancerRule": "rule-",
+      "localNetworkGateway": "lgw-",
+      "natGateway": "ng-",
+      "networkInterface": "nic-",
+      "networkSecurityGroup": "nsg-",
+      "networkSecurityGroupSecurityRules": "nsgsr-",
+      "networkWatcher": "nw-",
+      "privateLink": "pl-",
+      "privateEndpoint": "pep-",
+      "publicIPAddress": "pip-",
+      "publicIPAddressPrefix": "ippre-",
+      "routeFilter": "rf-",
+      "routeServer": "rtserv-",
+      "routeTable": "rt-",
+      "serviceEndpointPolicy": "se-",
+      "trafficManagerProfile": "traf-",
+      "userDefinedRoute": "udr-",
+      "virtualNetwork": "vnet-",
+      "virtualNetworkGateway": "vgw-",
+      "virtualNetworkManager": "vnm-",
+      "virtualNetworkPeering": "peer-",
+      "virtualNetworkSubnet": "snet-",
+      "virtualWAN": "vwan-",
+      "virtualWANHub": "vhub-",
+      "bastion": "bas-",
+      "keyVault": "kv-",
+      "keyVaultManagedHSM": "kvmhsm-",
+      "managedIdentity": "id-",
+      "vpnGateway": "vpng-",
+      "vpnConnection": "vcn-",
+      "vpnSite": "vst-",
+      "webApplicationFirewallPolicy": "waf",
+      "webApplicationFirewallPolicyRuleGroup": "wafrg",
+      "storSimple": "ssimp",
+      "backupVault": "bvault-",
+      "backupVaultPolicy": "bkpol-",
+      "fileShare": "share-",
+      "storageAccount": "st",
+      "storageSyncService": "sss-",
+      "virtualDesktopHostPool": "vdpool-",
+      "virtualDesktopApplicationGroup": "vdag-",
+      "virtualDesktopWorkspace": "vdws-",
+      "virtualDesktopScalingPlan": "vdscaling-"
+    },
+    "$fxv#1": {
+      "contributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+      "owner": "8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+      "reader": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+      "rbacAdministrator": "f58310d9-a9f6-439a-9e8d-f62e7b41a168",
+      "userAccessAdministrator": "18d7d88d-d35e-4fb5-a5c3-7773c20a72d9",
+      "keyVaultAdministrator": "00482a5a-887f-4fb3-b363-3b7fe8e74483",
+      "keyVaultContributor": "f25e0fa2-a7c8-4377-a976-54943a77a395",
+      "keyVaultSecretsOfficer": "b86a8fe4-44ce-4948-aee5-eccb2c155cd7",
+      "keyVaultSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6",
+      "acrPull": "7f951dda-4ed3-4680-a7ca-43fe172d538d",
+      "acrPush": "8311e382-0749-4cb8-b61a-304f252e45ec",
+      "serviceBusDataOwner": "090c5cfd-751d-490a-894a-3ce6f1109419",
+      "serviceBusDataReceiver": "4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0",
+      "serviceBusDataSender": "69a216fc-b8fb-44d8-bc22-1f3c2cd27a39",
+      "storageBlobDataContributor": "ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+      "storageBlobDataOwner": "b7e6dc6d-f1e8-4753-8033-0f276bb0955b",
+      "storageBlobDataReader": "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1",
+      "storageQueueDataContributor": "974c5e8b-45b9-4653-ba55-5f855dd0fb88",
+      "storageQueueDataReader": "19e7f393-937e-4f77-808e-94535e297925",
+      "storageTableDataContributor": "0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3",
+      "storageTableDataReader": "76199698-9eea-4c19-bc75-cec21354c6b6"
+    },
+    "$fxv#2": "<policies>\r\n    <inbound>\r\n        <cache-lookup-value key=\"backend-counter\" variable-name=\"backend-counter\" />\r\n        <choose>\r\n            <when condition=\"@(!context.Variables.ContainsKey(\"backend-counter\"))\">\r\n                <set-variable name=\"backend-counter\" value=\"0\" />\r\n                <cache-store-value key=\"backend-counter\" value=\"0\" duration=\"100\" />\r\n            </when>\r\n        </choose>\r\n        <choose>\r\n            <when condition=\"@(Convert.ToInt32(context.Variables[\"backend-counter\"]) == 0)\">\r\n                <set-backend-service backend-id=\"OpenAIWEU\" />\r\n                <set-header name=\"api-key\" exists-action=\"override\">\r\n                    <value>{{OPENAI-API-KEY-WEU}}</value>\r\n                </set-header>\r\n                <set-variable name=\"backend-counter\" value=\"1\" />\r\n                <cache-store-value key=\"backend-counter\" value=\"1\" duration=\"100\" />\r\n            </when>\r\n            <otherwise>\r\n                <set-backend-service backend-id=\"OpenAIEUS\" />\r\n                <set-header name=\"api-key\" exists-action=\"override\">\r\n                    <value>{{OPENAI-API-KEY-EUS}}</value>\r\n                </set-header>\r\n                <set-variable name=\"backend-counter\" value=\"0\" />\r\n                <cache-store-value key=\"backend-counter\" value=\"0\" duration=\"100\" />\r\n            </otherwise>\r\n        </choose>\r\n        <rewrite-uri template=\"@{return context.Request.OriginalUrl.Path;}\" />\r\n        <base />\r\n    </inbound>\r\n    <backend>\r\n        <retry condition=\"@(context.Response.StatusCode >= 400)\" count=\"3\" interval=\"5\" first-fast-retry=\"true\">\r\n            <cache-lookup-value key=\"backend-counter\" variable-name=\"backend-counter\" />\r\n            <choose>\r\n                <when condition=\"@(Convert.ToInt32(context.Variables[\"backend-counter\"]) == 0)\">\r\n                    <set-backend-service backend-id=\"OpenAIWEU\" />\r\n                    <set-header name=\"api-key\" exists-action=\"override\">\r\n                        <value>{{OPENAI-API-KEY-WEU}}</value>\r\n                    </set-header>\r\n                    <set-variable name=\"backend-counter\" value=\"1\" />\r\n                    <cache-store-value key=\"backend-counter\" value=\"1\" duration=\"100\" />\r\n                </when>\r\n                <otherwise>\r\n                    <set-backend-service backend-id=\"OpenAIEUS\" />\r\n                    <set-header name=\"api-key\" exists-action=\"override\">\r\n                        <value>{{OPENAI-API-KEY-EUS}}</value>\r\n                    </set-header>\r\n                    <set-variable name=\"backend-counter\" value=\"0\" />\r\n                    <cache-store-value key=\"backend-counter\" value=\"0\" duration=\"100\" />\r\n                </otherwise>\r\n            </choose>\r\n            <forward-request buffer-request-body=\"true\" />\r\n        </retry>\r\n    </backend>\r\n    <outbound>\r\n        <base />\r\n    </outbound>\r\n    <on-error>\r\n        <base />\r\n    </on-error>\r\n</policies>",
+    "abbrs": "[variables('$fxv#0')]",
+    "roles": "[variables('$fxv#1')]",
+    "resourceToken": "[toLower(uniqueString(subscription().id, parameters('workloadName'), parameters('location')))]"
+  },
+  "resources": {
+    "resourceGroup": {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2021-04-01",
+      "name": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "location": "[parameters('location')]",
+      "tags": "[union(parameters('tags'), createObject())]"
+    },
+    "keyVaultAdministrator": {
+      "existing": true,
+      "type": "Microsoft.Authorization/roleDefinitions",
+      "apiVersion": "2022-04-01",
+      "resourceGroup": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "name": "[variables('roles').keyVaultAdministrator]",
+      "dependsOn": [
+        "resourceGroup"
+      ]
+    },
+    "managedIdentity": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[if(not(empty(parameters('managedIdentityName'))), parameters('managedIdentityName'), format('{0}{1}', variables('abbrs').managedIdentity, variables('resourceToken')))]",
+      "resourceGroup": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": "[if(not(empty(parameters('managedIdentityName'))), createObject('value', parameters('managedIdentityName')), createObject('value', format('{0}{1}', variables('abbrs').managedIdentity, variables('resourceToken'))))]",
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[union(parameters('tags'), createObject())]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "8427251594360760498"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the resource."
+              }
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Location to deploy the resource. Defaults to the location of the resource group."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2022-01-31-preview",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]"
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "ID for the deployed Managed Identity resource."
+              },
+              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name for the deployed Managed Identity resource."
+              },
+              "value": "[parameters('name')]"
+            },
+            "principalId": {
+              "type": "string",
+              "metadata": {
+                "description": "Principal ID for the deployed Managed Identity resource."
+              },
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('name')), '2022-01-31-preview').principalId]"
+            },
+            "clientId": {
+              "type": "string",
+              "metadata": {
+                "description": "Client ID for the deployed Managed Identity resource."
+              },
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('name')), '2022-01-31-preview').clientId]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "resourceGroup"
+      ]
+    },
+    "keyVault": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[if(not(empty(parameters('keyVaultName'))), parameters('keyVaultName'), format('{0}{1}', variables('abbrs').keyVault, variables('resourceToken')))]",
+      "resourceGroup": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": "[if(not(empty(parameters('keyVaultName'))), createObject('value', parameters('keyVaultName')), createObject('value', format('{0}{1}', variables('abbrs').keyVault, variables('resourceToken'))))]",
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[union(parameters('tags'), createObject())]"
+          },
+          "roleAssignments": {
+            "value": [
+              {
+                "principalId": "[reference('managedIdentity').outputs.principalId.value]",
+                "roleDefinitionId": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))), 'Microsoft.Authorization/roleDefinitions', variables('roles').keyVaultAdministrator)]"
+              }
+            ]
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "13476343571683150672"
+            }
+          },
+          "definitions": {
+            "roleAssignmentInfo": {
+              "type": "object",
+              "properties": {
+                "roleDefinitionId": {
+                  "type": "string"
+                },
+                "principalId": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the resource."
+              }
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Location to deploy the resource. Defaults to the location of the resource group."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource."
+              }
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "standard",
+              "allowedValues": [
+                "standard",
+                "premium"
+              ],
+              "metadata": {
+                "description": "Key Vault SKU name. Defaults to standard."
+              }
+            },
+            "enableSoftDelete": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Whether soft deletion is enabled. Defaults to true."
+              }
+            },
+            "roleAssignments": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/roleAssignmentInfo"
+              },
+              "defaultValue": [],
+              "metadata": {
+                "description": "Role assignments to create for the Key Vault."
+              }
+            }
+          },
+          "resources": {
+            "keyVault": {
+              "type": "Microsoft.KeyVault/vaults",
+              "apiVersion": "2022-07-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "sku": {
+                  "family": "A",
+                  "name": "[parameters('skuName')]"
+                },
+                "tenantId": "[subscription().tenantId]",
+                "networkAcls": {
+                  "defaultAction": "Allow",
+                  "bypass": "AzureServices"
+                },
+                "enableSoftDelete": "[parameters('enableSoftDelete')]",
+                "enabledForTemplateDeployment": true,
+                "enableRbacAuthorization": true
+              }
+            },
+            "assignment": {
+              "copy": {
+                "name": "assignment",
+                "count": "[length(parameters('roleAssignments'))]"
+              },
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.KeyVault/vaults/{0}', parameters('name'))]",
+              "name": "[guid(resourceId('Microsoft.KeyVault/vaults', parameters('name')), parameters('roleAssignments')[copyIndex()].principalId, parameters('roleAssignments')[copyIndex()].roleDefinitionId)]",
+              "properties": {
+                "principalId": "[parameters('roleAssignments')[copyIndex()].principalId]",
+                "roleDefinitionId": "[parameters('roleAssignments')[copyIndex()].roleDefinitionId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "keyVault"
+              ]
+            }
+          },
+          "outputs": {
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "ID for the deployed Key Vault resource."
+              },
+              "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name for the deployed Key Vault resource."
+              },
+              "value": "[parameters('name')]"
+            },
+            "uri": {
+              "type": "string",
+              "metadata": {
+                "description": "URI for the deployed Key Vault resource."
+              },
+              "value": "[reference('keyVault').vaultUri]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "keyVaultAdministrator",
+        "managedIdentity",
+        "resourceGroup"
+      ]
+    },
+    "openAI": {
+      "copy": {
+        "name": "openAI",
+        "count": "[length(parameters('openAIInstances'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[if(not(empty(parameters('openAIInstances')[copyIndex()].name)), parameters('openAIInstances')[copyIndex()].name, format('{0}{1}-{2}', variables('abbrs').cognitiveServices, variables('resourceToken'), parameters('openAIInstances')[copyIndex()].suffix))]",
+      "resourceGroup": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": "[if(not(empty(parameters('openAIInstances')[copyIndex()].name)), createObject('value', parameters('openAIInstances')[copyIndex()].name), createObject('value', format('{0}{1}-{2}', variables('abbrs').cognitiveServices, variables('resourceToken'), parameters('openAIInstances')[copyIndex()].suffix)))]",
+          "location": {
+            "value": "[parameters('openAIInstances')[copyIndex()].location]"
+          },
+          "tags": {
+            "value": "[union(parameters('tags'), createObject())]"
+          },
+          "sku": {
+            "value": {
+              "name": "S0"
+            }
+          },
+          "kind": {
+            "value": "OpenAI"
+          },
+          "deployments": {
+            "value": [
+              {
+                "name": "gpt-35-turbo",
+                "model": {
+                  "format": "OpenAI",
+                  "name": "gpt-35-turbo",
+                  "version": "0301"
+                },
+                "sku": {
+                  "name": "Standard",
+                  "capacity": 1
+                }
+              },
+              {
+                "name": "text-embedding-ada-002",
+                "model": {
+                  "format": "OpenAI",
+                  "name": "text-embedding-ada-002",
+                  "version": "2"
+                },
+                "sku": {
+                  "name": "Standard",
+                  "capacity": 1
+                }
+              }
+            ]
+          },
+          "keyVaultSecrets": {
+            "value": {
+              "name": "[reference('keyVault').outputs.name.value]",
+              "secrets": [
+                {
+                  "property": "PrimaryKey",
+                  "name": "[format('OPENAI-API-KEY-{0}', toUpper(parameters('openAIInstances')[copyIndex()].suffix))]"
+                }
+              ]
+            }
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "17821961718118002826"
+            }
+          },
+          "definitions": {
+            "keyVaultSecretInfo": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": "string",
+                  "allowedValues": [
+                    "PrimaryKey"
+                  ]
+                }
+              }
+            },
+            "keyVaultSecretsInfo": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "secrets": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/keyVaultSecretInfo"
+                  }
+                }
+              }
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the resource."
+              }
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Location to deploy the resource. Defaults to the location of the resource group."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource."
+              }
+            },
+            "sku": {
+              "type": "object",
+              "defaultValue": {
+                "name": "S0"
+              },
+              "metadata": {
+                "description": "Cognitive Services SKU. Defaults to S0."
+              }
+            },
+            "kind": {
+              "type": "string",
+              "defaultValue": "OpenAI",
+              "allowedValues": [
+                "Bing.Speech",
+                "SpeechTranslation",
+                "TextTranslation",
+                "Bing.Search.v7",
+                "Bing.Autosuggest.v7",
+                "Bing.CustomSearch",
+                "Bing.SpellCheck.v7",
+                "Bing.EntitySearch",
+                "Face",
+                "ComputerVision",
+                "ContentModerator",
+                "TextAnalytics",
+                "LUIS",
+                "SpeakerRecognition",
+                "CustomSpeech",
+                "CustomVision.Training",
+                "CustomVision.Prediction",
+                "OpenAI"
+              ],
+              "metadata": {
+                "description": "Cognitive Services Kind. Defaults to OpenAI."
+              }
+            },
+            "deployments": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "List of deployments for Cognitive Services."
+              }
+            },
+            "publicNetworkAccess": {
+              "type": "string",
+              "defaultValue": "Enabled",
+              "allowedValues": [
+                "Enabled",
+                "Disabled"
+              ],
+              "metadata": {
+                "description": "Whether to enable public network access. Defaults to Enabled."
+              }
+            },
+            "keyVaultSecrets": {
+              "$ref": "#/definitions/keyVaultSecretsInfo",
+              "nullable": true,
+              "metadata": {
+                "description": "Properties to store in a Key Vault."
+              }
+            }
+          },
+          "resources": {
+            "cognitiveServices": {
+              "type": "Microsoft.CognitiveServices/accounts",
+              "apiVersion": "2023-05-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "kind": "[parameters('kind')]",
+              "properties": {
+                "customSubDomainName": "[toLower(parameters('name'))]",
+                "publicNetworkAccess": "[parameters('publicNetworkAccess')]"
+              },
+              "sku": "[parameters('sku')]"
+            },
+            "deployment": {
+              "copy": {
+                "name": "deployment",
+                "count": "[length(parameters('deployments'))]",
+                "mode": "serial",
+                "batchSize": 1
+              },
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', parameters('name'), parameters('deployments')[copyIndex()].name)]",
+              "properties": {
+                "model": "[if(contains(parameters('deployments')[copyIndex()], 'model'), parameters('deployments')[copyIndex()].model, null())]",
+                "raiPolicyName": "[if(contains(parameters('deployments')[copyIndex()], 'raiPolicyName'), parameters('deployments')[copyIndex()].raiPolicyName, null())]"
+              },
+              "sku": "[if(contains(parameters('deployments')[copyIndex()], 'sku'), parameters('deployments')[copyIndex()].sku, createObject('name', 'Standard', 'capacity', 20))]",
+              "dependsOn": [
+                "cognitiveServices"
+              ]
+            },
+            "keyVaultSecret": {
+              "copy": {
+                "name": "keyVaultSecret",
+                "count": "[length(tryGet(parameters('keyVaultSecrets'), 'secrets'))]"
+              },
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}-secret', tryGet(parameters('keyVaultSecrets'), 'secrets')[copyIndex()].name)]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "keyVaultName": {
+                    "value": "[tryGet(parameters('keyVaultSecrets'), 'name')]"
+                  },
+                  "name": {
+                    "value": "[tryGet(parameters('keyVaultSecrets'), 'secrets')[copyIndex()].name]"
+                  },
+                  "value": "[if(equals(tryGet(parameters('keyVaultSecrets'), 'secrets')[copyIndex()].property, 'PrimaryKey'), createObject('value', listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('name')), '2023-05-01').key1), createObject('value', ''))]"
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.23.1.45101",
+                      "templateHash": "2852938992840759298"
+                    }
+                  },
+                  "parameters": {
+                    "name": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Name of the secret."
+                      }
+                    },
+                    "keyVaultName": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Name of the Key Vault associated with the secret."
+                      }
+                    },
+                    "value": {
+                      "type": "securestring",
+                      "metadata": {
+                        "description": "Value of the secret."
+                      }
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.KeyVault/vaults/secrets",
+                      "apiVersion": "2022-07-01",
+                      "name": "[format('{0}/{1}', parameters('keyVaultName'), parameters('name'))]",
+                      "properties": {
+                        "value": "[parameters('value')]",
+                        "attributes": {
+                          "enabled": true
+                        }
+                      }
+                    }
+                  ],
+                  "outputs": {
+                    "id": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "ID for the deployed Key Vault Secret resource."
+                      },
+                      "value": "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName'), parameters('name'))]"
+                    },
+                    "name": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Name for the deployed Key Vault Secret resource."
+                      },
+                      "value": "[parameters('name')]"
+                    },
+                    "uri": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "URI for the deployed Key Vault Secret resource."
+                      },
+                      "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName'), parameters('name')), '2022-07-01').secretUri]"
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "cognitiveServices"
+              ]
+            }
+          },
+          "outputs": {
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "ID for the deployed Cognitive Services resource."
+              },
+              "value": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name for the deployed Cognitive Services resource."
+              },
+              "value": "[parameters('name')]"
+            },
+            "endpoint": {
+              "type": "string",
+              "metadata": {
+                "description": "Endpoint for the deployed Cognitive Services resource."
+              },
+              "value": "[reference('cognitiveServices').endpoint]"
+            },
+            "host": {
+              "type": "string",
+              "metadata": {
+                "description": "Host for the deployed Cognitive Services resource."
+              },
+              "value": "[split(reference('cognitiveServices').endpoint, '/')[2]]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "keyVault",
+        "resourceGroup"
+      ]
+    },
+    "apiManagement": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[if(not(empty(parameters('apiManagementName'))), parameters('apiManagementName'), format('{0}{1}', variables('abbrs').apiManagementService, variables('resourceToken')))]",
+      "resourceGroup": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": "[if(not(empty(parameters('apiManagementName'))), createObject('value', parameters('apiManagementName')), createObject('value', format('{0}{1}', variables('abbrs').apiManagementService, variables('resourceToken'))))]",
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[union(parameters('tags'), createObject())]"
+          },
+          "sku": {
+            "value": {
+              "name": "Developer",
+              "capacity": 1
+            }
+          },
+          "publisherEmail": {
+            "value": "[parameters('apiManagementPublisherEmail')]"
+          },
+          "publisherName": {
+            "value": "[parameters('apiManagementPublisherName')]"
+          },
+          "apiManagementIdentityId": {
+            "value": "[reference('managedIdentity').outputs.id.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "17786616836504509892"
+            }
+          },
+          "definitions": {
+            "skuInfo": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "allowedValues": [
+                    "Basic",
+                    "Consumption",
+                    "Developer",
+                    "Isolated",
+                    "Premium",
+                    "Standard"
+                  ]
+                },
+                "capacity": {
+                  "type": "int"
+                }
+              }
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the resource."
+              }
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Location to deploy the resource. Defaults to the location of the resource group."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource."
+              }
+            },
+            "apiManagementIdentityId": {
+              "type": "string",
+              "metadata": {
+                "description": "ID for the Managed Identity associated with the API Management resource."
+              }
+            },
+            "publisherEmail": {
+              "type": "string",
+              "minLength": 1,
+              "metadata": {
+                "description": "Email address of the owner for the API Management resource."
+              }
+            },
+            "publisherName": {
+              "type": "string",
+              "minLength": 1,
+              "metadata": {
+                "description": "Name of the owner for the API Management resource."
+              }
+            },
+            "sku": {
+              "$ref": "#/definitions/skuInfo",
+              "defaultValue": {
+                "name": "Developer",
+                "capacity": 1
+              },
+              "metadata": {
+                "description": "API Management SKU. Defaults to Developer, capacity 1."
+              }
+            }
+          },
+          "resources": {
+            "apiManagement": {
+              "type": "Microsoft.ApiManagement/service",
+              "apiVersion": "2023-03-01-preview",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": "[parameters('sku')]",
+              "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', parameters('apiManagementIdentityId'))]": {}
+                }
+              },
+              "properties": {
+                "publisherEmail": "[parameters('publisherEmail')]",
+                "publisherName": "[parameters('publisherName')]"
+              }
+            }
+          },
+          "outputs": {
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "ID for the deployed API Management resource."
+              },
+              "value": "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name for the deployed API Management resource."
+              },
+              "value": "[parameters('name')]"
+            },
+            "gatewayUrl": {
+              "type": "string",
+              "metadata": {
+                "description": "Gateway URL for the deployed API Management resource."
+              },
+              "value": "[reference('apiManagement').gatewayUrl]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "managedIdentity",
+        "resourceGroup"
+      ]
+    },
+    "openAIApiKeyNamedValue": {
+      "copy": {
+        "name": "openAIApiKeyNamedValue",
+        "count": "[length(parameters('openAIInstances'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('NV-OPENAI-API-KEY-{0}', toUpper(parameters('openAIInstances')[copyIndex()].suffix))]",
+      "resourceGroup": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[format('OPENAI-API-KEY-{0}', toUpper(parameters('openAIInstances')[copyIndex()].suffix))]"
+          },
+          "displayName": {
+            "value": "[format('OPENAI-API-KEY-{0}', toUpper(parameters('openAIInstances')[copyIndex()].suffix))]"
+          },
+          "apiManagementName": {
+            "value": "[reference('apiManagement').outputs.name.value]"
+          },
+          "apiManagementIdentityClientId": {
+            "value": "[reference('managedIdentity').outputs.clientId.value]"
+          },
+          "keyVaultSecretUri": {
+            "value": "[format('{0}secrets/OPENAI-API-KEY-{1}', reference('keyVault').outputs.uri.value, toUpper(parameters('openAIInstances')[copyIndex()].suffix))]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "6147457596094604196"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the named value."
+              }
+            },
+            "apiManagementName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the API Management associated with the named value."
+              }
+            },
+            "displayName": {
+              "type": "string",
+              "metadata": {
+                "description": "Display name of the named value."
+              }
+            },
+            "apiManagementIdentityClientId": {
+              "type": "string",
+              "metadata": {
+                "description": "Client ID for the Managed Identity associated with the API Management resource."
+              }
+            },
+            "keyVaultSecretUri": {
+              "type": "string",
+              "metadata": {
+                "description": "URI of the Key Vault secret."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ApiManagement/service/namedValues",
+              "apiVersion": "2023-03-01-preview",
+              "name": "[format('{0}/{1}', parameters('apiManagementName'), parameters('name'))]",
+              "properties": {
+                "displayName": "[parameters('displayName')]",
+                "keyVault": {
+                  "identityClientId": "[parameters('apiManagementIdentityClientId')]",
+                  "secretIdentifier": "[parameters('keyVaultSecretUri')]"
+                },
+                "secret": true
+              }
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "ID for the deployed API Management Named Value resource."
+              },
+              "value": "[resourceId('Microsoft.ApiManagement/service/namedValues', parameters('apiManagementName'), parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name for the deployed API Management Named Value resource."
+              },
+              "value": "[parameters('name')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "apiManagement",
+        "keyVault",
+        "managedIdentity",
+        "resourceGroup"
+      ]
+    },
+    "openAIApi": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}-api-openai', if(not(empty(parameters('apiManagementName'))), parameters('apiManagementName'), format('{0}{1}', variables('abbrs').apiManagementService, variables('resourceToken'))))]",
+      "resourceGroup": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "openai"
+          },
+          "apiManagementName": {
+            "value": "[reference('apiManagement').outputs.name.value]"
+          },
+          "path": {
+            "value": "/openai"
+          },
+          "format": {
+            "value": "openapi-link"
+          },
+          "displayName": {
+            "value": "OpenAI"
+          },
+          "value": {
+            "value": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/cognitiveservices/data-plane/AzureOpenAI/inference/preview/2023-07-01-preview/inference.json"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "2905682958398852478"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the API."
+              }
+            },
+            "apiManagementName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the API Management associated with the API."
+              }
+            },
+            "displayName": {
+              "type": "string",
+              "metadata": {
+                "description": "Display name of the API."
+              }
+            },
+            "path": {
+              "type": "string",
+              "metadata": {
+                "description": "Relative URL for the API and all of its resource paths associated with the API Management resource."
+              }
+            },
+            "format": {
+              "type": "string",
+              "allowedValues": [
+                "openapi",
+                "openapi+json",
+                "openapi+json-link",
+                "openapi-link"
+              ],
+              "metadata": {
+                "description": "Format for the OpenAPI specification."
+              }
+            },
+            "value": {
+              "type": "string",
+              "metadata": {
+                "description": "Value for the OpenAPI specification."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ApiManagement/service/apis",
+              "apiVersion": "2023-03-01-preview",
+              "name": "[format('{0}/{1}', parameters('apiManagementName'), parameters('name'))]",
+              "properties": {
+                "displayName": "[parameters('displayName')]",
+                "path": "[parameters('path')]",
+                "format": "[parameters('format')]",
+                "value": "[parameters('value')]",
+                "subscriptionRequired": true
+              }
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "ID for the deployed API Management API resource."
+              },
+              "value": "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apiManagementName'), parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name for the deployed API Management API resource."
+              },
+              "value": "[parameters('name')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "apiManagement",
+        "resourceGroup"
+      ]
+    },
+    "apiSubscription": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}-subscription-openai', if(not(empty(parameters('apiManagementName'))), parameters('apiManagementName'), format('{0}{1}', variables('abbrs').apiManagementService, variables('resourceToken'))))]",
+      "resourceGroup": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "openai-sub"
+          },
+          "apiManagementName": {
+            "value": "[reference('apiManagement').outputs.name.value]"
+          },
+          "displayName": {
+            "value": "OpenAI API Subscription"
+          },
+          "scope": {
+            "value": "[format('/apis/{0}', reference('openAIApi').outputs.name.value)]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "17573863460640060465"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Subscription."
+              }
+            },
+            "apiManagementName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the API Management associated with the Subscription."
+              }
+            },
+            "displayName": {
+              "type": "string",
+              "metadata": {
+                "description": "Display name of the Subscription."
+              }
+            },
+            "scope": {
+              "type": "string",
+              "metadata": {
+                "description": "Scope of the Subscription (e.g., /products or /apis) associated with the API Management resource."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ApiManagement/service/subscriptions",
+              "apiVersion": "2023-03-01-preview",
+              "name": "[format('{0}/{1}', parameters('apiManagementName'), parameters('name'))]",
+              "properties": {
+                "displayName": "[parameters('displayName')]",
+                "scope": "[parameters('scope')]",
+                "state": "active"
+              }
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "ID for the deployed API Management Subscription resource."
+              },
+              "value": "[resourceId('Microsoft.ApiManagement/service/subscriptions', parameters('apiManagementName'), parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name for the deployed API Management Subscription resource."
+              },
+              "value": "[parameters('name')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "apiManagement",
+        "openAIApi",
+        "resourceGroup"
+      ]
+    },
+    "openAIApiBackend": {
+      "copy": {
+        "name": "openAIApiBackend",
+        "count": "[length(parameters('openAIInstances'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}-backend-openai-{1}', if(not(empty(parameters('apiManagementName'))), parameters('apiManagementName'), format('{0}{1}', variables('abbrs').apiManagementService, variables('resourceToken'))), parameters('openAIInstances')[copyIndex()].suffix)]",
+      "resourceGroup": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[format('OPENAI{0}', toUpper(parameters('openAIInstances')[copyIndex()].suffix))]"
+          },
+          "apiManagementName": {
+            "value": "[reference('apiManagement').outputs.name.value]"
+          },
+          "url": {
+            "value": "[reference(format('openAI[{0}]', copyIndex())).outputs.endpoint.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "4518315968290826239"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Backend."
+              }
+            },
+            "apiManagementName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the API Management associated with the Backend."
+              }
+            },
+            "url": {
+              "type": "string",
+              "metadata": {
+                "description": "URL of the Backend."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ApiManagement/service/backends",
+              "apiVersion": "2023-03-01-preview",
+              "name": "[format('{0}/{1}', parameters('apiManagementName'), parameters('name'))]",
+              "properties": {
+                "protocol": "http",
+                "url": "[parameters('url')]"
+              }
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "ID for the deployed API Management Backend resource."
+              },
+              "value": "[resourceId('Microsoft.ApiManagement/service/backends', parameters('apiManagementName'), parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name for the deployed API Management Backend resource."
+              },
+              "value": "[parameters('name')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "apiManagement",
+        "[format('openAI[{0}]', copyIndex())]",
+        "resourceGroup"
+      ]
+    },
+    "loadBalancingPolicy": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}-policy-load-balancing', if(not(empty(parameters('apiManagementName'))), parameters('apiManagementName'), format('{0}{1}', variables('abbrs').apiManagementService, variables('resourceToken'))))]",
+      "resourceGroup": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "apiManagementName": {
+            "value": "[reference('apiManagement').outputs.name.value]"
+          },
+          "apiName": {
+            "value": "[reference('openAIApi').outputs.name.value]"
+          },
+          "format": {
+            "value": "rawxml"
+          },
+          "value": {
+            "value": "[variables('$fxv#2')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.23.1.45101",
+              "templateHash": "15776683543535143322"
+            }
+          },
+          "parameters": {
+            "apiManagementName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the API Management associated with the Policy."
+              }
+            },
+            "apiName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the API to associate with the Policy."
+              }
+            },
+            "format": {
+              "type": "string",
+              "allowedValues": [
+                "rawxml",
+                "rawxml-link",
+                "xml",
+                "xml-link"
+              ],
+              "metadata": {
+                "description": "Format of the Policy associated with the API Management resource."
+              }
+            },
+            "value": {
+              "type": "string",
+              "metadata": {
+                "description": "Value of the Policy associated with the API Management resource."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ApiManagement/service/apis/policies",
+              "apiVersion": "2023-03-01-preview",
+              "name": "[format('{0}/{1}/{2}', parameters('apiManagementName'), parameters('apiName'), 'policy')]",
+              "properties": {
+                "format": "[parameters('format')]",
+                "value": "[parameters('value')]"
+              }
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "ID for the deployed API Management Policy resource."
+              },
+              "value": "[resourceId('Microsoft.ApiManagement/service/apis/policies', parameters('apiManagementName'), parameters('apiName'), 'policy')]"
+            },
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name for the deployed API Management Policy resource."
+              },
+              "value": "policy"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "apiManagement",
+        "openAIApi",
+        "resourceGroup"
+      ]
+    }
+  },
+  "outputs": {
+    "resourceGroupInstance": {
+      "type": "object",
+      "value": {
+        "id": "[subscriptionResourceId('Microsoft.Resources/resourceGroups', if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName'))))]",
+        "name": "[if(not(empty(parameters('resourceGroupName'))), parameters('resourceGroupName'), format('{0}{1}', variables('abbrs').resourceGroup, parameters('workloadName')))]"
+      }
+    },
+    "managedIdentityInstance": {
+      "type": "object",
+      "value": {
+        "id": "[reference('managedIdentity').outputs.id.value]",
+        "name": "[reference('managedIdentity').outputs.name.value]",
+        "principalId": "[reference('managedIdentity').outputs.principalId.value]",
+        "clientId": "[reference('managedIdentity').outputs.clientId.value]"
+      }
+    },
+    "keyVaultInstance": {
+      "type": "object",
+      "value": {
+        "id": "[reference('keyVault').outputs.id.value]",
+        "name": "[reference('keyVault').outputs.name.value]",
+        "uri": "[reference('keyVault').outputs.uri.value]"
+      }
+    },
+    "openAIInstances": {
+      "type": "array",
+      "copy": {
+        "count": "[length(parameters('openAIInstances'))]",
+        "input": {
+          "name": "[reference(format('openAI[{0}]', copyIndex())).outputs.name.value]",
+          "host": "[reference(format('openAI[{0}]', copyIndex())).outputs.host.value]",
+          "endpoint": "[reference(format('openAI[{0}]', copyIndex())).outputs.endpoint.value]",
+          "location": "[parameters('openAIInstances')[copyIndex()].location]",
+          "suffix": "[parameters('openAIInstances')[copyIndex()].suffix]"
+        }
+      }
+    },
+    "apiManagementInstance": {
+      "type": "object",
+      "value": {
+        "id": "[reference('apiManagement').outputs.id.value]",
+        "name": "[reference('apiManagement').outputs.name.value]",
+        "gatewayUrl": "[reference('apiManagement').outputs.gatewayUrl.value]",
+        "subscriptionName": "[reference('apiSubscription').outputs.name.value]"
+      }
+    }
+  }
+}
