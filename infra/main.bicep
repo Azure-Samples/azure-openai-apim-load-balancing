@@ -29,13 +29,13 @@ param keyVaultName string = ''
 param openAIInstances openAIInstanceInfo[] = [
   {
     name: ''
-    location: 'westeurope'
-    suffix: 'weu'
+    location: 'uksouth'
+    suffix: 'uks'
   }
   {
     name: ''
-    location: 'eastus'
-    suffix: 'eus'
+    location: 'westus'
+    suffix: 'wus'
   }
 ]
 @description('Name of the API Management service. If empty, a unique name will be generated.')
@@ -86,24 +86,20 @@ module keyVault './core/key-vault.bicep' = {
   }
 }
 
-module openAI './core/cognitive-services.bicep' = [for openAIInstance in openAIInstances: {
-  name: !empty(openAIInstance.name) ? openAIInstance.name! : '${abbrs.cognitiveServices}${resourceToken}-${openAIInstance.suffix}'
+module openAI './core/openai.bicep' = [for openAIInstance in openAIInstances: {
+  name: !empty(openAIInstance.name) ? openAIInstance.name! : '${abbrs.openAIService}${resourceToken}-${openAIInstance.suffix}'
   scope: resourceGroup
   params: {
-    name: !empty(openAIInstance.name) ? openAIInstance.name! : '${abbrs.cognitiveServices}${resourceToken}-${openAIInstance.suffix}'
+    name: !empty(openAIInstance.name) ? openAIInstance.name! : '${abbrs.openAIService}${resourceToken}-${openAIInstance.suffix}'
     location: openAIInstance.location
     tags: union(tags, {})
-    sku: {
-      name: 'S0'
-    }
-    kind: 'OpenAI'
     deployments: [
       {
         name: 'gpt-35-turbo'
         model: {
           format: 'OpenAI'
           name: 'gpt-35-turbo'
-          version: '0301'
+          version: '1106'
         }
         sku: {
           name: 'Standard'
@@ -123,14 +119,9 @@ module openAI './core/cognitive-services.bicep' = [for openAIInstance in openAII
         }
       }
     ]
-    keyVaultSecrets: {
-      name: keyVault.outputs.name
-      secrets: [
-        {
-          property: 'PrimaryKey'
-          name: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
-        }
-      ]
+    keyVaultConfig: {
+      keyVaultName: keyVault.outputs.name
+      primaryKeySecretName: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
     }
   }
 }]
@@ -205,7 +196,7 @@ module loadBalancingPolicy './core/api-management-policy.bicep' = {
     apiManagementName: apiManagement.outputs.name
     apiName: openAIApi.outputs.name
     format: 'rawxml'
-    value: loadTextContent('./policies/round-robin-policy.xml') 
+    value: loadTextContent('./policies/round-robin-policy.xml')
   }
 }
 

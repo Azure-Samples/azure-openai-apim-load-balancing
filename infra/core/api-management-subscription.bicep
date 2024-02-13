@@ -7,10 +7,10 @@ param displayName string
 @description('Scope of the Subscription (e.g., /products or /apis) associated with the API Management resource.')
 param scope string
 
-resource apiManagement 'Microsoft.ApiManagement/service@2023-03-01-preview' existing = {
+resource apiManagement 'Microsoft.ApiManagement/service@2023-05-01-preview' existing = {
   name: apiManagementName
 
-  resource subscription 'subscriptions@2023-03-01-preview' = {
+  resource subscription 'subscriptions@2023-05-01-preview' = {
     name: name
     properties: {
       displayName: displayName

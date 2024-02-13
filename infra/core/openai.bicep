@@ -5,43 +5,17 @@ param location string = resourceGroup().location
 @description('Tags for the resource.')
 param tags object = {}
 
-type keyVaultSecretInfo = {
-  name: string
-  property: 'PrimaryKey'
+type roleAssignmentInfo = {
+  roleDefinitionId: string
+  principalId: string
 }
 
 type keyVaultSecretsInfo = {
-  name: string
-  secrets: keyVaultSecretInfo[]
+  keyVaultName: string
+  primaryKeySecretName: string
 }
 
-@description('Cognitive Services SKU. Defaults to S0.')
-param sku object = {
-  name: 'S0'
-}
-@description('Cognitive Services Kind. Defaults to OpenAI.')
-@allowed([
-  'Bing.Speech'
-  'SpeechTranslation'
-  'TextTranslation'
-  'Bing.Search.v7'
-  'Bing.Autosuggest.v7'
-  'Bing.CustomSearch'
-  'Bing.SpellCheck.v7'
-  'Bing.EntitySearch'
-  'Face'
-  'ComputerVision'
-  'ContentModerator'
-  'TextAnalytics'
-  'LUIS'
-  'SpeakerRecognition'
-  'CustomSpeech'
-  'CustomVision.Training'
-  'CustomVision.Prediction'
-  'OpenAI'
-])
-param kind string = 'OpenAI'
-@description('List of deployments for Cognitive Services.')
+@description('List of model deployments.')
 param deployments array = []
 @description('Whether to enable public network access. Defaults to Enabled.')
 @allowed([
@@ -50,22 +24,29 @@ param deployments array = []
 ])
 param publicNetworkAccess string = 'Enabled'
 @description('Properties to store in a Key Vault.')
-param keyVaultSecrets keyVaultSecretsInfo?
+param keyVaultConfig keyVaultSecretsInfo = {
+  keyVaultName: ''
+  primaryKeySecretName: ''
+}
+@description('Role assignments to create for the Azure OpenAI Service instance.')
+param roleAssignments roleAssignmentInfo[] = []
 
-resource cognitiveServices 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+resource cognitiveServices 'Microsoft.CognitiveServices/accounts@2023-10-01-preview' = {
   name: name
   location: location
   tags: tags
-  kind: kind
+  kind: 'OpenAI'
   properties: {
     customSubDomainName: toLower(name)
     publicNetworkAccess: publicNetworkAccess
   }
-  sku: sku
+  sku: {
+    name: 'S0'
+  }
 }
 
 @batchSize(1)
-resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: {
+resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-10-01-preview' = [for deployment in deployments: {
   parent: cognitiveServices
   name: deployment.name
   properties: {
@@ -78,12 +59,22 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
   }
 }]
 
-module keyVaultSecret './key-vault-secret.bicep' = [for secret in keyVaultSecrets.?secrets!: {
-  name: '${secret.name}-secret'
+module primaryKeySecret './key-vault-secret.bicep' = if (!empty(keyVaultConfig.primaryKeySecretName)) {
+  name: '${keyVaultConfig.primaryKeySecretName}-secret'
   params: {
-    keyVaultName: keyVaultSecrets.?name!
-    name: secret.name
-    value: secret.property == 'PrimaryKey' ? cognitiveServices.listKeys().key1 : ''
+    keyVaultName: keyVaultConfig.keyVaultName
+    name: keyVaultConfig.primaryKeySecretName
+    value: cognitiveServices.listKeys().key1
+  }
+}
+
+resource assignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for roleAssignment in roleAssignments: {
+  name: guid(cognitiveServices.id, roleAssignment.principalId, roleAssignment.roleDefinitionId)
+  scope: cognitiveServices
+  properties: {
+    principalId: roleAssignment.principalId
+    roleDefinitionId: roleAssignment.roleDefinitionId
+    principalType: 'ServicePrincipal'
   }
 }]
 

@@ -1,8 +1,23 @@
 {
-  "cognitiveSearch": "srch-",
-  "cognitiveServices": "cog-",
+  "aiSearch": "srch-",
+  "aiServices": "aisa-",
+  "aiVideoIndexer": "avi-",
   "machineLearningWorkspace": "mlw-",
-
+  "openAIService": "oai-",
+  "botService": "bot-",
+  "computerVision": "cv-",
+  "contentModerator": "cm-",
+  "contentSafety": "cs-",
+  "customVisionPrediction": "cstv-",
+  "customVisionTraining": "cstvt-",
+  "documentIntelligence": "di-",
+  "faceApi": "face-",
+  "healthInsights": "hi-",
+  "immersiveReader": "ir-",
+  "languageService": "lang-",
+  "speechService": "spch-",
+  "translator": "trsl-",
+  "aiWorkspace": "aiw-",
   "analysisServicesServer": "as",
   "databricksWorkspace": "dbw-",
   "dataExplorerCluster": "dec",
@@ -31,7 +46,6 @@
   "provisioningServicesCertificate": "pcert-",
   "powerBIEmbedded": "pbi-",
   "timeSeriesInsightsEnvironment": "tsi-",
-
   "appServiceEnvironment": "ase-",
   "appServicePlan": "asp-",
   "loadTesting": "lt-",
@@ -58,7 +72,6 @@
   "virtualMachineMaintenanceConfiguration": "mc-",
   "virtualMachineStorageAccount": "stvm",
   "webApp": "app-",
-
   "aksCluster": "aks-",
   "containerApp": "ca-",
   "containerAppsEnvironment": "cae-",
@@ -66,7 +79,6 @@
   "containerInstance": "ci",
   "serviceFabricCluster": "sf-",
   "serviceFabricManagedCluster": "sfmc-",
-
   "cosmosDBDatabase": "cosmos-",
   "cosmosDBApacheCassandra": "coscas-",
   "cosmosDBMongoDB": "cosmon-",
@@ -85,14 +97,11 @@
   "postgreSQLDatabase": "psql-",
   "sqlServerStretchDatabase": "sqlstrdb-",
   "sqlManagedInstance": "sqlmi-",
-
   "appConfigurationStore": "appcs-",
   "mapsAccount": "map-",
   "signalR": "sigr",
   "webPubSub": "wps-",
-
   "managedGrafana": "amg-",
-
   "apiManagementService": "apim-",
   "integrationAccount": "ia-",
   "logicApps": "logic-",
@@ -100,7 +109,6 @@
   "serviceBusQueue": "sbq-",
   "serviceBusTopic": "sbt-",
   "serviceBusTopicSubscription": "sbts-",
-
   "automationAccount": "aa-",
   "applicationInsights": "appi-",
   "monitorActionGroup": "ag-",
@@ -113,11 +121,9 @@
   "purviewInstance": "pview-",
   "resourceGroup": "rg-",
   "templateSpecsName": "ts-",
-
   "migrateProject": "migr-",
   "databaseMigrationService": "dms-",
   "recoveryServicesVault": "rsv-",
-
   "applicationGateway": "agw-",
   "applicationSecurityGroup": "asg-",
   "cdnProfile": "cdnp-",
@@ -158,7 +164,6 @@
   "virtualNetworkSubnet": "snet-",
   "virtualWAN": "vwan-",
   "virtualWANHub": "vhub-",
-
   "bastion": "bas-",
   "keyVault": "kv-",
   "keyVaultManagedHSM": "kvmhsm-",
@@ -168,14 +173,12 @@
   "vpnSite": "vst-",
   "webApplicationFirewallPolicy": "waf",
   "webApplicationFirewallPolicyRuleGroup": "wafrg",
-
   "storSimple": "ssimp",
   "backupVault": "bvault-",
   "backupVaultPolicy": "bkpol-",
   "fileShare": "share-",
   "storageAccount": "st",
   "storageSyncService": "sss-",
-
   "virtualDesktopHostPool": "vdpool-",
   "virtualDesktopApplicationGroup": "vdag-",
   "virtualDesktopWorkspace": "vdws-",

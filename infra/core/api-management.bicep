@@ -24,7 +24,7 @@ param sku skuInfo = {
   capacity: 1
 }
 
-resource apiManagement 'Microsoft.ApiManagement/service@2023-03-01-preview' = {
+resource apiManagement 'Microsoft.ApiManagement/service@2023-05-01-preview' = {
   name: name
   location: location
   tags: tags

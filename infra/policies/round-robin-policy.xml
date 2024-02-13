@@ -9,17 +9,17 @@
         </choose>
         <choose>
             <when condition="@(Convert.ToInt32(context.Variables["backend-counter"]) == 0)">
-                <set-backend-service backend-id="OpenAIWEU" />
+                <set-backend-service backend-id="OpenAIUKS" />
                 <set-header name="api-key" exists-action="override">
-                    <value>{{OPENAI-API-KEY-WEU}}</value>
+                    <value>{{OPENAI-API-KEY-UKS}}</value>
                 </set-header>
                 <set-variable name="backend-counter" value="1" />
                 <cache-store-value key="backend-counter" value="1" duration="100" />
             </when>
             <otherwise>
-                <set-backend-service backend-id="OpenAIEUS" />
+                <set-backend-service backend-id="OpenAIWUS" />
                 <set-header name="api-key" exists-action="override">
-                    <value>{{OPENAI-API-KEY-EUS}}</value>
+                    <value>{{OPENAI-API-KEY-WUS}}</value>
                 </set-header>
                 <set-variable name="backend-counter" value="0" />
                 <cache-store-value key="backend-counter" value="0" duration="100" />
@@ -33,17 +33,17 @@
             <cache-lookup-value key="backend-counter" variable-name="backend-counter" />
             <choose>
                 <when condition="@(Convert.ToInt32(context.Variables["backend-counter"]) == 0)">
-                    <set-backend-service backend-id="OpenAIWEU" />
+                    <set-backend-service backend-id="OpenAIUKS" />
                     <set-header name="api-key" exists-action="override">
-                        <value>{{OPENAI-API-KEY-WEU}}</value>
+                        <value>{{OPENAI-API-KEY-UKS}}</value>
                     </set-header>
                     <set-variable name="backend-counter" value="1" />
                     <cache-store-value key="backend-counter" value="1" duration="100" />
                 </when>
                 <otherwise>
-                    <set-backend-service backend-id="OpenAIEUS" />
+                    <set-backend-service backend-id="OpenAIWUS" />
                     <set-header name="api-key" exists-action="override">
-                        <value>{{OPENAI-API-KEY-EUS}}</value>
+                        <value>{{OPENAI-API-KEY-WUS}}</value>
                     </set-header>
                     <set-variable name="backend-counter" value="0" />
                     <cache-store-value key="backend-counter" value="0" duration="100" />
