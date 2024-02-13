@@ -13,19 +13,19 @@ param format string
 @description('Value of the Policy associated with the API Management resource.')
 param value string
 
-resource apiManagement 'Microsoft.ApiManagement/service@2023-03-01-preview' existing = {
+resource apiManagement 'Microsoft.ApiManagement/service@2023-05-01-preview' existing = {
   name: apiManagementName
 
-  resource api 'apis@2023-03-01-preview' existing = {
+  resource api 'apis@2023-05-01-preview' existing = {
     name: apiName
 
-    resource policy 'policies@2023-03-01-preview' = {
+    resource policy 'policies@2023-05-01-preview' = {
       name: 'policy'
       properties: {
         format: format
         value: value
       }
-    }  
+    }
   }
 }
 

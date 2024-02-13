@@ -5,7 +5,7 @@ param location string = resourceGroup().location
 @description('Tags for the resource.')
 param tags object = {}
 
-resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
     name: name
     location: location
     tags: tags

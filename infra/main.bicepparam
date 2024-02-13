@@ -1,6 +1,6 @@
 using './main.bicep'
 
 param workloadName = 'aoai-apim-loadbalancing'
-param location = 'westeurope'
+param location = 'uksouth'
 param apiManagementPublisherEmail = ''
 param apiManagementPublisherName = ''

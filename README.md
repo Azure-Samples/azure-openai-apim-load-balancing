@@ -60,7 +60,7 @@ To deploy the infrastructure and test load balancing using Azure API Management,
 ### Prerequisites
 
 - Install the latest [**.NET SDK**](https://dotnet.microsoft.com/download).
-- Install [**PowerShell Core**](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.1).
+- Install [**PowerShell Core**](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell).
 - Install the [**Azure CLI**](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
 - Install [**Visual Studio Code**](https://code.visualstudio.com/) with the [**Polyglot Notebooks extension**](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.dotnet-interactive-vscode).
 - Apply for access to the [**Azure OpenAI Service**](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview#how-do-i-get-access-to-azure-openai).
