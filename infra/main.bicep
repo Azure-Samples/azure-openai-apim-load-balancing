@@ -86,45 +86,51 @@ module keyVault './core/key-vault.bicep' = {
   }
 }
 
-module openAI './core/openai.bicep' = [for openAIInstance in openAIInstances: {
-  name: !empty(openAIInstance.name) ? openAIInstance.name! : '${abbrs.openAIService}${resourceToken}-${openAIInstance.suffix}'
-  scope: resourceGroup
-  params: {
-    name: !empty(openAIInstance.name) ? openAIInstance.name! : '${abbrs.openAIService}${resourceToken}-${openAIInstance.suffix}'
-    location: openAIInstance.location
-    tags: union(tags, {})
-    deployments: [
-      {
-        name: 'gpt-35-turbo'
-        model: {
-          format: 'OpenAI'
+module openAI './core/openai.bicep' = [
+  for openAIInstance in openAIInstances: {
+    name: !empty(openAIInstance.name)
+      ? openAIInstance.name!
+      : '${abbrs.openAIService}${resourceToken}-${openAIInstance.suffix}'
+    scope: resourceGroup
+    params: {
+      name: !empty(openAIInstance.name)
+        ? openAIInstance.name!
+        : '${abbrs.openAIService}${resourceToken}-${openAIInstance.suffix}'
+      location: openAIInstance.location
+      tags: union(tags, {})
+      deployments: [
+        {
           name: 'gpt-35-turbo'
-          version: '1106'
+          model: {
+            format: 'OpenAI'
+            name: 'gpt-35-turbo'
+            version: '1106'
+          }
+          sku: {
+            name: 'Standard'
+            capacity: 1
+          }
         }
-        sku: {
-          name: 'Standard'
-          capacity: 1
-        }
-      }
-      {
-        name: 'text-embedding-ada-002'
-        model: {
-          format: 'OpenAI'
+        {
           name: 'text-embedding-ada-002'
-          version: '2'
+          model: {
+            format: 'OpenAI'
+            name: 'text-embedding-ada-002'
+            version: '2'
+          }
+          sku: {
+            name: 'Standard'
+            capacity: 1
+          }
         }
-        sku: {
-          name: 'Standard'
-          capacity: 1
-        }
+      ]
+      keyVaultConfig: {
+        keyVaultName: keyVault.outputs.name
+        primaryKeySecretName: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
       }
-    ]
-    keyVaultConfig: {
-      keyVaultName: keyVault.outputs.name
-      primaryKeySecretName: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
     }
   }
-}]
+]
 
 module apiManagement './core/api-management.bicep' = {
   name: !empty(apiManagementName) ? apiManagementName : '${abbrs.apiManagementService}${resourceToken}'
@@ -143,17 +149,19 @@ module apiManagement './core/api-management.bicep' = {
   }
 }
 
-module openAIApiKeyNamedValue './core/api-management-key-vault-named-value.bicep' = [for openAIInstance in openAIInstances: {
-  name: 'NV-OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
-  scope: resourceGroup
-  params: {
-    name: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
-    displayName: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
-    apiManagementName: apiManagement.outputs.name
-    apiManagementIdentityClientId: managedIdentity.outputs.clientId
-    keyVaultSecretUri: '${keyVault.outputs.uri}secrets/OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
+module openAIApiKeyNamedValue './core/api-management-key-vault-named-value.bicep' = [
+  for openAIInstance in openAIInstances: {
+    name: 'NV-OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
+    scope: resourceGroup
+    params: {
+      name: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
+      displayName: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
+      apiManagementName: apiManagement.outputs.name
+      apiManagementIdentityClientId: managedIdentity.outputs.clientId
+      keyVaultSecretUri: '${keyVault.outputs.uri}secrets/OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
+    }
   }
-}]
+]
 
 module openAIApi './core/api-management-openapi-api.bicep' = {
   name: '${apiManagement.name}-api-openai'
@@ -164,7 +172,7 @@ module openAIApi './core/api-management-openapi-api.bicep' = {
     path: '/openai'
     format: 'openapi-link'
     displayName: 'OpenAI'
-    value: 'https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/cognitiveservices/data-plane/AzureOpenAI/inference/preview/2023-07-01-preview/inference.json'
+    value: 'https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/cognitiveservices/data-plane/AzureOpenAI/inference/preview/2024-03-01-preview/inference.json'
   }
 }
 
@@ -179,15 +187,17 @@ module apiSubscription './core/api-management-subscription.bicep' = {
   }
 }
 
-module openAIApiBackend './core/api-management-backend.bicep' = [for (item, index) in openAIInstances: {
-  name: '${apiManagement.name}-backend-openai-${item.suffix}'
-  scope: resourceGroup
-  params: {
-    name: 'OPENAI${toUpper(item.suffix)}'
-    apiManagementName: apiManagement.outputs.name
-    url: openAI[index].outputs.endpoint
+module openAIApiBackend './core/api-management-backend.bicep' = [
+  for (item, index) in openAIInstances: {
+    name: '${apiManagement.name}-backend-openai-${item.suffix}'
+    scope: resourceGroup
+    params: {
+      name: 'OPENAI${toUpper(item.suffix)}'
+      apiManagementName: apiManagement.outputs.name
+      url: openAI[index].outputs.endpoint
+    }
   }
-}]
+]
 
 module loadBalancingPolicy './core/api-management-policy.bicep' = {
   name: '${apiManagement.name}-policy-load-balancing'
@@ -200,33 +210,36 @@ module loadBalancingPolicy './core/api-management-policy.bicep' = {
   }
 }
 
-output resourceGroupInstance object = {
+output resourceGroupInfo object = {
   id: resourceGroup.id
   name: resourceGroup.name
+  location: resourceGroup.location
 }
 
-output managedIdentityInstance object = {
+output managedIdentityInfo object = {
   id: managedIdentity.outputs.id
   name: managedIdentity.outputs.name
   principalId: managedIdentity.outputs.principalId
   clientId: managedIdentity.outputs.clientId
 }
 
-output keyVaultInstance object = {
+output keyVaultInfo object = {
   id: keyVault.outputs.id
   name: keyVault.outputs.name
   uri: keyVault.outputs.uri
 }
 
-output openAIInstances array = [for (item, index) in openAIInstances: {
-  name: openAI[index].outputs.name
-  host: openAI[index].outputs.host
-  endpoint: openAI[index].outputs.endpoint
-  location: item.location
-  suffix: item.suffix
-}]
+output openAIInfo array = [
+  for (item, index) in openAIInstances: {
+    id: openAI[index].outputs.id
+    name: openAI[index].outputs.name
+    endpoint: openAI[index].outputs.endpoint
+    location: item.location
+    suffix: item.suffix
+  }
+]
 
-output apiManagementInstance object = {
+output apiManagementInfo object = {
   id: apiManagement.outputs.id
   name: apiManagement.outputs.name
   gatewayUrl: apiManagement.outputs.gatewayUrl

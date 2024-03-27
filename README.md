@@ -1,17 +1,17 @@
 ---
 page_type: sample
 languages:
-- azurecli
-- bicep
-- powershell
-- yaml
-- json
+  - azurecli
+  - bicep
+  - powershell
+  - yaml
+  - json
 products:
-- azure
-- azure-openai
-- azure-api-management
-- azure-resource-manager
-- azure-key-vault
+  - azure
+  - azure-openai
+  - azure-api-management
+  - azure-resource-manager
+  - azure-key-vault
 name: Azure OpenAI Service Load Balancing with Azure API Management
 description: This sample demonstrates how to load balance requests between multiple Azure OpenAI Services using Azure API Management.
 ---
@@ -39,7 +39,7 @@ The following diagram illustrates the simplified user flow of the sample.
 ![User flow diagram](./images/flow.png)
 
 1. A user makes a request to a deployed Azure API Management API that is configured using the Azure OpenAI API specification.
-    - The API Management API is configured with a policy that uses a static, round-robin load balancing technique to route requests to one of the Azure OpenAI Service instances.
+   - The API Management API is configured with a policy that uses a static, round-robin load balancing technique to route requests to one of the Azure OpenAI Service instances.
 2. Based on the selected Azure OpenAI Service instance, the API key for the instance is retrieved from Azure Key Vault.
 3. The original request including headers and body are forwarded to the selected Azure OpenAI Service instance, along with the specific API key header.
 
