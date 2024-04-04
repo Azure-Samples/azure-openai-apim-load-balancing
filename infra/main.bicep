@@ -23,8 +23,6 @@ type openAIInstanceInfo = {
 
 @description('Name of the Managed Identity. If empty, a unique name will be generated.')
 param managedIdentityName string = ''
-@description('Name of the Key Vault. If empty, a unique name will be generated.')
-param keyVaultName string = ''
 @description('OpenAI instances to deploy. Defaults to 2 across different regions.')
 param openAIInstances openAIInstanceInfo[] = [
   {
@@ -62,27 +60,6 @@ module managedIdentity './core/managed-identity.bicep' = {
     name: !empty(managedIdentityName) ? managedIdentityName : '${abbrs.managedIdentity}${resourceToken}'
     location: location
     tags: union(tags, {})
-  }
-}
-
-resource keyVaultAdministrator 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: resourceGroup
-  name: roles.keyVaultAdministrator
-}
-
-module keyVault './core/key-vault.bicep' = {
-  name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVault}${resourceToken}'
-  scope: resourceGroup
-  params: {
-    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVault}${resourceToken}'
-    location: location
-    tags: union(tags, {})
-    roleAssignments: [
-      {
-        principalId: managedIdentity.outputs.principalId
-        roleDefinitionId: keyVaultAdministrator.id
-      }
-    ]
   }
 }
 
@@ -156,20 +133,6 @@ module apiManagement './core/api-management.bicep' = {
   }
 }
 
-module openAIApiKeyNamedValue './core/api-management-key-vault-named-value.bicep' = [
-  for openAIInstance in openAIInstances: {
-    name: 'NV-OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
-    scope: resourceGroup
-    params: {
-      name: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
-      displayName: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
-      apiManagementName: apiManagement.outputs.name
-      apiManagementIdentityClientId: managedIdentity.outputs.clientId
-      keyVaultSecretUri: '${keyVault.outputs.uri}secrets/OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
-    }
-  }
-]
-
 module managedIdentityClientIdNamedValue './core/api-management-named-value.bicep' = {
   name: 'NV-MANAGED-IDENTITY-CLIENT-ID'
   scope: resourceGroup
@@ -239,12 +202,6 @@ output managedIdentityInfo object = {
   name: managedIdentity.outputs.name
   principalId: managedIdentity.outputs.principalId
   clientId: managedIdentity.outputs.clientId
-}
-
-output keyVaultInfo object = {
-  id: keyVault.outputs.id
-  name: keyVault.outputs.name
-  uri: keyVault.outputs.uri
 }
 
 output openAIInfo array = [
