@@ -86,6 +86,11 @@ module keyVault './core/key-vault.bicep' = {
   }
 }
 
+resource cognitiveServicesOpenAIUser 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: resourceGroup
+  name: roles.cognitiveServicesOpenAIUser
+}
+
 module openAI './core/openai.bicep' = [
   for openAIInstance in openAIInstances: {
     name: !empty(openAIInstance.name)
@@ -124,10 +129,12 @@ module openAI './core/openai.bicep' = [
           }
         }
       ]
-      keyVaultConfig: {
-        keyVaultName: keyVault.outputs.name
-        primaryKeySecretName: 'OPENAI-API-KEY-${toUpper(openAIInstance.suffix)}'
-      }
+      roleAssignments: [
+        {
+          principalId: managedIdentity.outputs.principalId
+          roleDefinitionId: cognitiveServicesOpenAIUser.id
+        }
+      ]
     }
   }
 ]
@@ -162,6 +169,17 @@ module openAIApiKeyNamedValue './core/api-management-key-vault-named-value.bicep
     }
   }
 ]
+
+module managedIdentityClientIdNamedValue './core/api-management-named-value.bicep' = {
+  name: 'NV-MANAGED-IDENTITY-CLIENT-ID'
+  scope: resourceGroup
+  params: {
+    name: 'MANAGED-IDENTITY-CLIENT-ID'
+    displayName: 'MANAGED-IDENTITY-CLIENT-ID'
+    apiManagementName: apiManagement.outputs.name
+    value: managedIdentity.outputs.clientId
+  }
+}
 
 module openAIApi './core/api-management-openapi-api.bicep' = {
   name: '${apiManagement.name}-api-openai'
