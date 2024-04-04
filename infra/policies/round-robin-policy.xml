@@ -1,5 +1,6 @@
 <policies>
     <inbound>
+        <base />
         <cache-lookup-value key="backend-counter" variable-name="backend-counter" />
         <choose>
             <when condition="@(!context.Variables.ContainsKey("backend-counter"))">
@@ -10,23 +11,20 @@
         <choose>
             <when condition="@(Convert.ToInt32(context.Variables["backend-counter"]) == 0)">
                 <set-backend-service backend-id="OpenAIUKS" />
-                <set-header name="api-key" exists-action="override">
-                    <value>{{OPENAI-API-KEY-UKS}}</value>
-                </set-header>
                 <set-variable name="backend-counter" value="1" />
                 <cache-store-value key="backend-counter" value="1" duration="100" />
             </when>
             <otherwise>
                 <set-backend-service backend-id="OpenAIWUS" />
-                <set-header name="api-key" exists-action="override">
-                    <value>{{OPENAI-API-KEY-WUS}}</value>
-                </set-header>
                 <set-variable name="backend-counter" value="0" />
                 <cache-store-value key="backend-counter" value="0" duration="100" />
             </otherwise>
         </choose>
+        <authentication-managed-identity resource="https://cognitiveservices.azure.com" client-id="{{MANAGED-IDENTITY-CLIENT-ID}}" output-token-variable-name="msi-access-token" ignore-error="false" />
+        <set-header name="Authorization" exists-action="override">
+            <value>@("Bearer " + (string)context.Variables["msi-access-token"])</value>
+        </set-header>
         <rewrite-uri template="@{return context.Request.OriginalUrl.Path;}" />
-        <base />
     </inbound>
     <backend>
         <retry condition="@(context.Response.StatusCode >= 400)" count="3" interval="5" first-fast-retry="true">
@@ -34,17 +32,11 @@
             <choose>
                 <when condition="@(Convert.ToInt32(context.Variables["backend-counter"]) == 0)">
                     <set-backend-service backend-id="OpenAIUKS" />
-                    <set-header name="api-key" exists-action="override">
-                        <value>{{OPENAI-API-KEY-UKS}}</value>
-                    </set-header>
                     <set-variable name="backend-counter" value="1" />
                     <cache-store-value key="backend-counter" value="1" duration="100" />
                 </when>
                 <otherwise>
                     <set-backend-service backend-id="OpenAIWUS" />
-                    <set-header name="api-key" exists-action="override">
-                        <value>{{OPENAI-API-KEY-WUS}}</value>
-                    </set-header>
                     <set-variable name="backend-counter" value="0" />
                     <cache-store-value key="backend-counter" value="0" duration="100" />
                 </otherwise>

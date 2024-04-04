@@ -4,10 +4,8 @@ param name string
 param apiManagementName string
 @description('Display name of the named value.')
 param displayName string
-@description('Client ID for the Managed Identity associated with the API Management resource.')
-param apiManagementIdentityClientId string
-@description('URI of the Key Vault secret.')
-param keyVaultSecretUri string
+@description('Value of the named value.')
+param value string
 
 resource apiManagement 'Microsoft.ApiManagement/service@2023-05-01-preview' existing = {
   name: apiManagementName
@@ -16,11 +14,7 @@ resource apiManagement 'Microsoft.ApiManagement/service@2023-05-01-preview' exis
     name: name
     properties: {
       displayName: displayName
-      keyVault: {
-        identityClientId: apiManagementIdentityClientId
-        secretIdentifier: keyVaultSecretUri
-      }
-      secret: true
+      value: value
     }
   }
 }
